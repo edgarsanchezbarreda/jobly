@@ -36,6 +36,16 @@ class BadRequestError extends ExpressError {
     }
 }
 
+/** 400 BAD FILTER REQUEST error. */
+
+class BadFilterRequestError extends ExpressError {
+    constructor(
+        message = 'Maximum selected employees must be greater than the minimum selected employees'
+    ) {
+        super(message, 400);
+    }
+}
+
 /** 403 BAD REQUEST error. */
 
 class ForbiddenError extends ExpressError {
@@ -49,5 +59,6 @@ module.exports = {
     NotFoundError,
     UnauthorizedError,
     BadRequestError,
+    BadFilterRequestError,
     ForbiddenError,
 };

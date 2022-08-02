@@ -1,7 +1,11 @@
 'use strict';
 
 const db = require('../db');
-const { BadRequestError, NotFoundError } = require('../expressError');
+const {
+    BadRequestError,
+    NotFoundError,
+    BadFilterRequestError,
+} = require('../expressError');
 const { sqlForPartialUpdate } = require('../helpers/sql');
 
 /** Related functions for companies. */
@@ -57,6 +61,11 @@ class Company {
         return companiesRes.rows;
     }
 
+    /** Find company with most employees.
+     *
+     * Returns [{ numEmployees }]
+     * */
+
     static async findMaxEmployees() {
         const companiesRes = await db.query(
             `SELECT
@@ -67,7 +76,25 @@ class Company {
         return companiesRes.rows[0];
     }
 
-    static async findByAllFilters(n = '', min, max) {
+    /** Finds all companies if there are any filters present.
+     *
+     * Throws error if 'minimum' is grater then 'maximum' filter.
+     *
+     * Allows none, some, or all filters to be used.
+     *
+     * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
+     * */
+
+    static async findByAllFilters(
+        n = '',
+        min = 0,
+        max = this.findMaxEmployees()
+    ) {
+        if (min > max) {
+            throw new BadFilterRequestError(
+                'Maximum selected employees must be greater than minimum selected employees'
+            );
+        }
         const companiesRes = await db.query(
             `SELECT handle,
                   name,
@@ -79,33 +106,7 @@ class Company {
 		   AND num_employees BETWEEN ${min} AND ${max}
            ORDER BY name`
         );
-        return companiesRes.rows;
-    }
 
-    static async findByMinAndMax(min, max) {
-        const companiesRes = await db.query(
-            `SELECT handle,
-                  name,
-                  description,  
-				  num_employees AS "numEmployees"                
-                  logo_url AS "logoUrl"
-           FROM companies
-		   WHERE num_employees BETWEEN ${min} AND ${max}
-           ORDER BY name`
-        );
-        return companiesRes.rows;
-    }
-
-    static async findByName(n) {
-        const companiesRes = await db.query(
-            `SELECT handle,
-                  name,
-                  description,                  
-                  logo_url AS "logoUrl"
-           FROM companies
-		   WHERE LOWER(name) LIKE '%${n}%'
-           ORDER BY name`
-        );
         return companiesRes.rows;
     }
 

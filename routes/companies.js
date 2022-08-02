@@ -5,7 +5,7 @@
 const jsonschema = require('jsonschema');
 const express = require('express');
 
-const { BadRequestError } = require('../expressError');
+const { BadRequestError, BadFilterRequestError } = require('../expressError');
 const { ensureLoggedIn } = require('../middleware/auth');
 const Company = require('../models/company');
 
@@ -51,16 +51,23 @@ router.post('/', ensureLoggedIn, async function (req, res, next) {
 
 router.get('/', async function (req, res, next) {
     try {
+        // Finds the company with the most employees.
         const mostEmployees = await Company.findMaxEmployees();
 
-        // const name = req.query.name.toLowerCase();
+        // Sets name to the query if present, or an empty string if not present.
         const name = req.query.name ? req.query.name.toLowerCase() : '';
+
+        // Sets minEmployees to amount in query if present, or 0 if not present.
         const minEmployees =
             req.query.minEmployees != null ? req.query.minEmployees : 0;
+
+        // Sets maxEmployees to amount in query if present, or mostEmployees if not present.
         const maxEmployees =
             req.query.maxEmployees > 0
                 ? req.query.maxEmployees
                 : mostEmployees.numEmployees;
+
+        // Sets companies variable to the list of filtered companies.
         let companies = await Company.findByAllFilters(
             name,
             minEmployees,
@@ -72,69 +79,6 @@ router.get('/', async function (req, res, next) {
         return next(err);
     }
 });
-// router.get('/', async function (req, res, next) {
-//     // const names = ['Edgar', 'Jon', 'Eddard', 'Tyrion', 'Teddy']
-
-//     // const ed = names.filter(name => name.toLowerCase().includes('ed'))
-
-//     // console.log(req.query.name);
-//     try {
-//         // let array1 = ['a','b','c']
-//         // let array2 = ['c','c','d','e'];
-//         // let array3 = array1.concat(array2);
-//         // array3 = [...new Set([...array1,...array2])]
-//         // const name = req.query.name;
-//         // const minEmployees = req.query.minEmployees;
-//         // const maxEmployees = req.query.maxEmployees;
-
-//         // const sss = fruits.filter(f => some.includes(f))l
-//         const name = typeof req.query.name.length > 0 ? req.query.name : [];
-//         const minEmployees =
-//             req.query.minEmployees > 0 ? req.query.minEmployees : [];
-//         const maxEmployees =
-//             req.query.maxEmployees > 0 ? req.query.maxEmployees : [];
-
-//         const companies = await Company.findAll();
-//         const nameFilteredCompanies = await companies.filter((comp) =>
-//             comp.name.toLowerCase().includes(name)
-//         );
-//         const minFilteredCompanies = await companies.filter(
-//             (comp) => comp.numEmployees >= minEmployees
-//         );
-//         const maxFilteredCompanies = await companies.filter(
-//             (comp) => comp.numEmployees <= maxEmployees
-//         );
-//         // const filteredCompanies = [
-//         //     ...new Set([
-//         //         ...nameFilteredCompanies,
-//         //         ...minFilteredCompanies,
-//         //         ...maxFilteredCompanies,
-//         //     ]),
-//         // ];
-//         let filteredCompanies = [
-//             ...nameFilteredCompanies,
-//             ...minFilteredCompanies,
-//             ...maxFilteredCompanies,
-//         ];
-//         // filteredCompanies = nameFilteredCompanies.filter((name) => {
-//         //     return (
-//         //         nameFilteredCompanies.includes(name) &&
-//         //         minFilteredCompanies.includes(name) &&
-//         //         maxFilteredCompanies.includes(name)
-//         //     );
-//         // });
-//         const newArr = method1(filteredCompanies);
-
-//         console.log(req.query);
-//         // console.log(newArr);
-//         // if (filteredCompanies.length > 0) {
-//         //     return res.json({ companies: filteredCompanies });
-//         // }
-//         return res.json({ hope: 'lets see' });
-//     } catch (err) {
-//         return next(err);
-//     }
-// });
 
 /** GET /[handle]  =>  { company }
  *
