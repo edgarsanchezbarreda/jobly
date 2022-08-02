@@ -53,13 +53,18 @@ router.post('/', ensureLoggedIn, async function (req, res, next) {
 
 router.get('/', async function (req, res, next) {
     try {
-        const name = req.query.name.length > 0 ? req.query.name : [];
+        const name = req.query.name.toLowerCase();
         const minEmployees =
             req.query.minEmployees > 0 ? req.query.minEmployees : [];
         const maxEmployees =
             req.query.maxEmployees > 0 ? req.query.maxEmployees : [];
-
-        const companies = await Company.findByName(name);
+        let companies = [];
+        if (name) {
+            companies = await Company.findByName(name);
+        } else {
+            companies = await Company.findAll();
+        }
+        console.log(name);
         console.log(companies);
         return res.json({ hope: 'lets see' });
     } catch (err) {

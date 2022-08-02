@@ -63,7 +63,7 @@ class Company {
                   description,                  
                   logo_url AS "logoUrl"
            FROM companies
-		   WHERE name LIKE '%${n}%'
+		   WHERE LOWER(name) LIKE '%${n}%'
            ORDER BY name`
         );
         return companiesRes.rows;
