@@ -52,21 +52,7 @@ router.post('/', ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get('/', async function (req, res, next) {
-    // const names = ['Edgar', 'Jon', 'Eddard', 'Tyrion', 'Teddy']
-
-    // const ed = names.filter(name => name.toLowerCase().includes('ed'))
-
-    // console.log(req.query.name);
     try {
-        // let array1 = ['a','b','c']
-        // let array2 = ['c','c','d','e'];
-        // let array3 = array1.concat(array2);
-        // array3 = [...new Set([...array1,...array2])]
-        // const name = req.query.name;
-        // const minEmployees = req.query.minEmployees;
-        // const maxEmployees = req.query.maxEmployees;
-
-        // const sss = fruits.filter(f => some.includes(f))l
         const name = req.query.name.length > 0 ? req.query.name : [];
         const minEmployees =
             req.query.minEmployees > 0 ? req.query.minEmployees : [];
