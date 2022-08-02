@@ -22,9 +22,7 @@ const router = new express.Router();
  *
  * Authorization required: login
  */
-const method1 = (arr) => [
-    ...new Set(arr.filter((elm) => arr.indexOf(elm) !== arr.lastIndexOf(elm))),
-];
+
 router.post('/', ensureLoggedIn, async function (req, res, next) {
     try {
         const validator = jsonschema.validate(req.body, companyNewSchema);
@@ -53,20 +51,23 @@ router.post('/', ensureLoggedIn, async function (req, res, next) {
 
 router.get('/', async function (req, res, next) {
     try {
-        const name = req.query.name.toLowerCase();
+        const mostEmployees = await Company.findMaxEmployees();
+
+        // const name = req.query.name.toLowerCase();
+        const name = req.query.name ? req.query.name.toLowerCase() : '';
         const minEmployees =
-            req.query.minEmployees > 0 ? req.query.minEmployees : [];
+            req.query.minEmployees != null ? req.query.minEmployees : 0;
         const maxEmployees =
-            req.query.maxEmployees > 0 ? req.query.maxEmployees : [];
-        let companies = [];
-        if (name) {
-            companies = await Company.findByName(name);
-        } else {
-            companies = await Company.findAll();
-        }
-        console.log(name);
-        console.log(companies);
-        return res.json({ hope: 'lets see' });
+            req.query.maxEmployees > 0
+                ? req.query.maxEmployees
+                : mostEmployees.numEmployees;
+        let companies = await Company.findByAllFilters(
+            name,
+            minEmployees,
+            maxEmployees
+        );
+
+        return res.json({ companies: companies });
     } catch (err) {
         return next(err);
     }

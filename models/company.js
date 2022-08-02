@@ -56,6 +56,46 @@ class Company {
         );
         return companiesRes.rows;
     }
+
+    static async findMaxEmployees() {
+        const companiesRes = await db.query(
+            `SELECT
+			MAX(num_employees) AS "numEmployees"
+			FROM companies
+			`
+        );
+        return companiesRes.rows[0];
+    }
+
+    static async findByAllFilters(n = '', min, max) {
+        const companiesRes = await db.query(
+            `SELECT handle,
+                  name,
+                  description,
+				  num_employees AS "numEmployees",                  
+                  logo_url AS "logoUrl"
+           FROM companies
+		   WHERE LOWER(name) LIKE '%${n}%'
+		   AND num_employees BETWEEN ${min} AND ${max}
+           ORDER BY name`
+        );
+        return companiesRes.rows;
+    }
+
+    static async findByMinAndMax(min, max) {
+        const companiesRes = await db.query(
+            `SELECT handle,
+                  name,
+                  description,  
+				  num_employees AS "numEmployees"                
+                  logo_url AS "logoUrl"
+           FROM companies
+		   WHERE num_employees BETWEEN ${min} AND ${max}
+           ORDER BY name`
+        );
+        return companiesRes.rows;
+    }
+
     static async findByName(n) {
         const companiesRes = await db.query(
             `SELECT handle,
@@ -151,3 +191,7 @@ class Company {
 }
 
 module.exports = Company;
+
+const x = (a, b, c) => {
+    return a, b, c;
+};
