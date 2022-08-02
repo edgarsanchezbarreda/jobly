@@ -22,7 +22,9 @@ const router = new express.Router();
  *
  * Authorization required: login
  */
-
+const method1 = (arr) => [
+    ...new Set(arr.filter((elm) => arr.indexOf(elm) !== arr.lastIndexOf(elm))),
+];
 router.post('/', ensureLoggedIn, async function (req, res, next) {
     try {
         const validator = jsonschema.validate(req.body, companyNewSchema);
@@ -60,23 +62,87 @@ router.get('/', async function (req, res, next) {
         // let array2 = ['c','c','d','e'];
         // let array3 = array1.concat(array2);
         // array3 = [...new Set([...array1,...array2])]
-        const name = req.query.name;
-        const minEmployees = req.query.minEmployees;
-        const maxEmployees = req.query.maxEmployees;
+        // const name = req.query.name;
+        // const minEmployees = req.query.minEmployees;
+        // const maxEmployees = req.query.maxEmployees;
 
-        const companies = await Company.findAll();
-        const filteredCompanies = companies.filter(
-            (comp) => comp.numEmployees >= minEmployees
-        );
-        console.log(filteredCompanies);
-        if (filteredCompanies.length > 0) {
-            return res.json({ companies: filteredCompanies });
-        }
-        return res.json({ companies });
+        // const sss = fruits.filter(f => some.includes(f))l
+        const name = req.query.name.length > 0 ? req.query.name : [];
+        const minEmployees =
+            req.query.minEmployees > 0 ? req.query.minEmployees : [];
+        const maxEmployees =
+            req.query.maxEmployees > 0 ? req.query.maxEmployees : [];
+
+        const companies = await Company.findByName(name);
+        console.log(companies);
+        return res.json({ hope: 'lets see' });
     } catch (err) {
         return next(err);
     }
 });
+// router.get('/', async function (req, res, next) {
+//     // const names = ['Edgar', 'Jon', 'Eddard', 'Tyrion', 'Teddy']
+
+//     // const ed = names.filter(name => name.toLowerCase().includes('ed'))
+
+//     // console.log(req.query.name);
+//     try {
+//         // let array1 = ['a','b','c']
+//         // let array2 = ['c','c','d','e'];
+//         // let array3 = array1.concat(array2);
+//         // array3 = [...new Set([...array1,...array2])]
+//         // const name = req.query.name;
+//         // const minEmployees = req.query.minEmployees;
+//         // const maxEmployees = req.query.maxEmployees;
+
+//         // const sss = fruits.filter(f => some.includes(f))l
+//         const name = typeof req.query.name.length > 0 ? req.query.name : [];
+//         const minEmployees =
+//             req.query.minEmployees > 0 ? req.query.minEmployees : [];
+//         const maxEmployees =
+//             req.query.maxEmployees > 0 ? req.query.maxEmployees : [];
+
+//         const companies = await Company.findAll();
+//         const nameFilteredCompanies = await companies.filter((comp) =>
+//             comp.name.toLowerCase().includes(name)
+//         );
+//         const minFilteredCompanies = await companies.filter(
+//             (comp) => comp.numEmployees >= minEmployees
+//         );
+//         const maxFilteredCompanies = await companies.filter(
+//             (comp) => comp.numEmployees <= maxEmployees
+//         );
+//         // const filteredCompanies = [
+//         //     ...new Set([
+//         //         ...nameFilteredCompanies,
+//         //         ...minFilteredCompanies,
+//         //         ...maxFilteredCompanies,
+//         //     ]),
+//         // ];
+//         let filteredCompanies = [
+//             ...nameFilteredCompanies,
+//             ...minFilteredCompanies,
+//             ...maxFilteredCompanies,
+//         ];
+//         // filteredCompanies = nameFilteredCompanies.filter((name) => {
+//         //     return (
+//         //         nameFilteredCompanies.includes(name) &&
+//         //         minFilteredCompanies.includes(name) &&
+//         //         maxFilteredCompanies.includes(name)
+//         //     );
+//         // });
+//         const newArr = method1(filteredCompanies);
+
+//         console.log(req.query);
+//         // console.log(newArr);
+//         // if (filteredCompanies.length > 0) {
+//         //     return res.json({ companies: filteredCompanies });
+//         // }
+//         return res.json({ hope: 'lets see' });
+//     } catch (err) {
+//         return next(err);
+//     }
+// });
 
 /** GET /[handle]  =>  { company }
  *

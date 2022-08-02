@@ -56,6 +56,18 @@ class Company {
         );
         return companiesRes.rows;
     }
+    static async findByName(n) {
+        const companiesRes = await db.query(
+            `SELECT handle,
+                  name,
+                  description,                  
+                  logo_url AS "logoUrl"
+           FROM companies
+		   WHERE name LIKE '%${n}%'
+           ORDER BY name`
+        );
+        return companiesRes.rows;
+    }
 
     /** Given a company handle, return data about company.
      *
