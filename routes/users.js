@@ -71,23 +71,22 @@ router.get('/', ensureAdminLoggedIn, async function (req, res, next) {
  * Authorization required: login
  **/
 
-router.get(
-    '/:username',
-    ensureAdminOrUserLoggedIn,
-    async function (req, res, next) {
-        try {
-            const token = req.headers.authorization;
-            const decoded = jwt.decode(token);
-            const user = await User.get(req.params.username);
-            if (decoded.username === req.params.username) {
-                return res.json({ user });
-            }
-            throw new UnauthorizedError();
-        } catch (err) {
-            return next(err);
+router.get('/:username', ensureLoggedIn, async function (req, res, next) {
+    try {
+        const token = req.headers.authorization;
+        const decoded = jwt.decode(token);
+        const user = await User.get(req.params.username);
+        if (
+            decoded.username === req.params.username ||
+            decoded.isAdmin === true
+        ) {
+            return res.json({ user });
         }
+        throw new UnauthorizedError();
+    } catch (err) {
+        return next(err);
     }
-);
+});
 
 /** PATCH /[username] { user } => { user }
  *
@@ -106,9 +105,16 @@ router.patch('/:username', ensureLoggedIn, async function (req, res, next) {
             const errs = validator.errors.map((e) => e.stack);
             throw new BadRequestError(errs);
         }
-
+        const token = req.headers.authorization;
+        const decoded = jwt.decode(token);
         const user = await User.update(req.params.username, req.body);
-        return res.json({ user });
+        if (
+            decoded.username === req.params.username ||
+            decoded.isAdmin === true
+        ) {
+            return res.json({ user });
+        }
+        throw new UnauthorizedError();
     } catch (err) {
         return next(err);
     }
@@ -121,8 +127,16 @@ router.patch('/:username', ensureLoggedIn, async function (req, res, next) {
 
 router.delete('/:username', ensureLoggedIn, async function (req, res, next) {
     try {
-        await User.remove(req.params.username);
-        return res.json({ deleted: req.params.username });
+        const token = req.headers.authorization;
+        const decoded = jwt.decode(token);
+        if (
+            decoded.username === req.params.username ||
+            decoded.isAdmin === true
+        ) {
+            await User.remove(req.params.username);
+            return res.json({ deleted: req.params.username });
+        }
+        throw new UnauthorizedError();
     } catch (err) {
         return next(err);
     }
