@@ -76,6 +76,9 @@ router.get('/:username', ensureLoggedIn, async function (req, res, next) {
         const token = req.headers.authorization;
         const decoded = jwt.decode(token);
         const user = await User.get(req.params.username);
+        console.log(token);
+        console.log(decoded);
+        console.log(req.params);
         if (
             decoded.username === req.params.username ||
             decoded.isAdmin === true

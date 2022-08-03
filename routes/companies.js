@@ -53,7 +53,7 @@ router.post('/', ensureAdminLoggedIn, async function (req, res, next) {
  * Authorization required: none
  */
 
-router.get('/', ensureAdminLoggedIn, async function (req, res, next) {
+router.get('/', async function (req, res, next) {
     try {
         // Finds the company with the most employees.
         const mostEmployees = await Company.findMaxEmployees();
