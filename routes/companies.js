@@ -6,7 +6,11 @@ const jsonschema = require('jsonschema');
 const express = require('express');
 
 const { BadRequestError, BadFilterRequestError } = require('../expressError');
-const { ensureLoggedIn } = require('../middleware/auth');
+const {
+    ensureLoggedIn,
+    ensureAdminLoggedIn,
+    ensureAdminOrUserLoggedIn,
+} = require('../middleware/auth');
 const Company = require('../models/company');
 
 const companyNewSchema = require('../schemas/companyNew.json');
@@ -23,7 +27,7 @@ const router = new express.Router();
  * Authorization required: login
  */
 
-router.post('/', ensureLoggedIn, async function (req, res, next) {
+router.post('/', ensureAdminLoggedIn, async function (req, res, next) {
     try {
         const validator = jsonschema.validate(req.body, companyNewSchema);
         if (!validator.valid) {
@@ -49,7 +53,7 @@ router.post('/', ensureLoggedIn, async function (req, res, next) {
  * Authorization required: none
  */
 
-router.get('/', async function (req, res, next) {
+router.get('/', ensureAdminOrUserLoggedIn, async function (req, res, next) {
     try {
         // Finds the company with the most employees.
         const mostEmployees = await Company.findMaxEmployees();
@@ -108,7 +112,7 @@ router.get('/:handle', async function (req, res, next) {
  * Authorization required: login
  */
 
-router.patch('/:handle', ensureLoggedIn, async function (req, res, next) {
+router.patch('/:handle', ensureAdminLoggedIn, async function (req, res, next) {
     try {
         const validator = jsonschema.validate(req.body, companyUpdateSchema);
         if (!validator.valid) {
@@ -128,7 +132,7 @@ router.patch('/:handle', ensureLoggedIn, async function (req, res, next) {
  * Authorization: login
  */
 
-router.delete('/:handle', ensureLoggedIn, async function (req, res, next) {
+router.delete('/:handle', ensureAdminLoggedIn, async function (req, res, next) {
     try {
         await Company.remove(req.params.handle);
         return res.json({ deleted: req.params.handle });
