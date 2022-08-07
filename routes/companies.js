@@ -12,9 +12,11 @@ const {
     ensureAdminOrUserLoggedIn,
 } = require('../middleware/auth');
 const Company = require('../models/company');
+const Job = require('../models/job');
 
 const companyNewSchema = require('../schemas/companyNew.json');
 const companyUpdateSchema = require('../schemas/companyUpdate.json');
+const db = require('../db');
 
 const router = new express.Router();
 
@@ -95,7 +97,12 @@ router.get('/', async function (req, res, next) {
 router.get('/:handle', async function (req, res, next) {
     try {
         const company = await Company.get(req.params.handle);
-        return res.json({ company });
+        const jobs = await Job.findByCompany(req.params.handle);
+        console.log(jobs);
+
+        company.jobs = jobs.map((job) => job);
+
+        return res.json({ company: company });
     } catch (err) {
         return next(err);
     }

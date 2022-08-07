@@ -74,6 +74,18 @@ class Job {
         return jobsRes.rows;
     }
 
+    static async findByCompany(handle) {
+        const result = await db.query(
+            `SELECT id, title, salary, equity
+			FROM jobs
+			WHERE company_handle = $1
+		
+			`,
+            [handle]
+        );
+        return result.rows;
+    }
+
     /**
      *
      * Given a job id, returns data about specific job.

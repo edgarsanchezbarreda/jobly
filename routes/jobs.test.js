@@ -67,6 +67,7 @@ describe('GET /jobs', function () {
         expect(resp.body).toEqual({
             jobs: [
                 {
+                    id: expect.any(Number),
                     title: 'Mailman',
                     salary: 35000,
                     equity: '0',
