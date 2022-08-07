@@ -61,6 +61,19 @@ class Job {
         return jobsRes.rows;
     }
 
+    static async findByAllFilters(title = '', minSalary = 0, hasEquity) {
+        const jobsRes = await db.query(
+            `SELECT id, title, salary, equity, company_handle AS "companyHandle"
+			FROM jobs
+			WHERE LOWER(title) LIKE '%${title}%'
+			AND salary >= ${minSalary}
+			AND equity >= ${hasEquity}
+			ORDER BY title
+			`
+        );
+        return jobsRes.rows;
+    }
+
     /**
      *
      * Given a job id, returns data about specific job.
