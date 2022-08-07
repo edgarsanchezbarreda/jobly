@@ -192,7 +192,3 @@ class Company {
 }
 
 module.exports = Company;
-
-const x = (a, b, c) => {
-    return a, b, c;
-};
