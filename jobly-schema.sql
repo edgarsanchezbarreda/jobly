@@ -32,7 +32,3 @@ CREATE TABLE applications (
     REFERENCES jobs ON DELETE CASCADE,
   PRIMARY KEY (username, job_id)
 );
-
--- SELECT companies.handle, companies.name, companies.num_employees, companies.description, companies.logo_url, jobs.id, jobs.title, jobs.salary, jobs.equity, jobs.company_handle
--- FROM companies
--- JOIN jobs ON companies.handle = jobs.company_handle

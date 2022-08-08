@@ -5,6 +5,7 @@ const request = require('supertest');
 const db = require('../db.js');
 const app = require('../app');
 const User = require('../models/user');
+const Job = require('../models/job');
 
 const {
     commonBeforeAll,
@@ -111,6 +112,41 @@ describe('POST /users', function () {
     });
 });
 
+/************************************** POST /users/:username/jobs/:job_id */
+
+describe('POST /users/:username/jobs/:job_id', function () {
+    // const newJob = {
+    //     title: 'Chef',
+    //     salary: 50000,
+    //     equity: '0',
+    //     companyHandle: 'c1',
+    // };
+    // const newUser = {
+    //     username: 'kobebryant',
+    //     firstName: 'Kobe',
+    //     lastName: 'Bryant',
+    //     email: 'kobebryant@gmail.com',
+    //     password: 'password',
+    //     isAdmin: true,
+    // };
+    test('Works for user or Admin', async function () {
+        const job = await db.query(
+            `SELECT * FROM jobs WHERE title = 'Mailman'
+			`
+        );
+        const jobRes = job.rows[0];
+        console.log(jobRes);
+        const resp = await request(app)
+            .post(`/users/u1/jobs/${jobRes.id}`)
+            .set('authorization', `${u2Token}`);
+        console.log(resp);
+        expect(resp.statusCode).toEqual(201);
+        expect(resp.body).toEqual({
+            applied: `${jobRes.id}`,
+        });
+    });
+});
+
 /************************************** GET /users */
 
 describe('GET /users', function () {
@@ -177,6 +213,7 @@ describe('GET /users/:username', function () {
                 lastName: 'U1L',
                 email: 'user1@user.com',
                 isAdmin: false,
+                jobs: [],
             },
         });
     });

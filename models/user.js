@@ -10,6 +10,7 @@ const {
 } = require('../expressError');
 
 const { BCRYPT_WORK_FACTOR } = require('../config.js');
+const { application } = require('express');
 
 /** Related functions for users. */
 
@@ -93,6 +94,51 @@ class User {
         const user = result.rows[0];
 
         return user;
+    }
+
+    /** Allows user to apply to job.
+     *
+     * Returns {username, job_id}
+     *
+     * Throws BadRequestError if duplicate application.
+     *
+     */
+    static async apply(username, job_id) {
+        const duplicateCheck = await db.query(
+            `SELECT * FROM applications WHERE username = $1 AND job_id = $2
+			`,
+            [username, job_id]
+        );
+        if (duplicateCheck.rows[0]) {
+            throw new BadRequestError(`Duplicate application: ${job_id}`);
+        }
+
+        const result = await db.query(
+            `INSERT INTO applications (username, job_id)
+			VALUES ($1, $2)
+			RETURNING username, job_id
+			`,
+            [username, job_id]
+        );
+        return result.rows[0];
+    }
+
+    /** Gets a User's applications
+     *
+     * Returns [{username, job_id}, ...]
+     *
+     * Throws NotFoundError if username does not exist.
+     */
+    static async getUserApplications(username) {
+        const results = await db.query(
+            `SELECT * FROM applications
+			WHERE username = $1
+			`,
+            [username]
+        );
+        const applications = results.rows;
+
+        return applications;
     }
 
     /** Find all users.

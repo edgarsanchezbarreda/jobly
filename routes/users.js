@@ -15,8 +15,10 @@ const User = require('../models/user');
 const { createToken } = require('../helpers/tokens');
 const userNewSchema = require('../schemas/userNew.json');
 const userUpdateSchema = require('../schemas/userUpdate.json');
+const applicationNewSchema = require('../schemas/applicationNew.json');
 const jwt = require('jsonwebtoken');
 const { decode } = require('jsonwebtoken');
+const Job = require('../models/job');
 
 const router = express.Router();
 
@@ -48,6 +50,46 @@ router.post('/', ensureAdminLoggedIn, async function (req, res, next) {
     }
 });
 
+/** POST /:username/jobs/:job_id => {applied: job_id}
+ *
+ * Allows a user to apply to an existing job.
+ *
+ * Authorization required: User logged in.
+ */
+router.post(
+    '/:username/jobs/:job_id',
+    ensureLoggedIn,
+    async function (req, res, next) {
+        try {
+            const token = req.headers.authorization;
+            const decoded = jwt.decode(token);
+
+            const username = req.params.username;
+            const job_id = parseInt(req.params.job_id);
+
+            const validator = jsonschema.validate(
+                { username: username, job_id: job_id },
+                applicationNewSchema
+            );
+            if (!validator.valid) {
+                const errs = validator.errors.map((e) => e.stack);
+                throw new BadRequestError(errs);
+            }
+
+            if (
+                decoded.username === req.params.username ||
+                decoded.isAdmin === true
+            ) {
+                await User.apply(username, job_id);
+                return res.status(201).json({ applied: `${job_id}` });
+            }
+            throw new UnauthorizedError();
+        } catch (err) {
+            return next(err);
+        }
+    }
+);
+
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
  *
  * Returns list of all users.
@@ -76,14 +118,16 @@ router.get('/:username', ensureLoggedIn, async function (req, res, next) {
         const token = req.headers.authorization;
         const decoded = jwt.decode(token);
         const user = await User.get(req.params.username);
-        console.log(token);
-        console.log(decoded);
-        console.log(req.params);
+        const jobs = await User.getUserApplications(req.params.username);
+        console.log(jobs);
+
         if (
             decoded.username === req.params.username ||
             decoded.isAdmin === true
         ) {
-            return res.json({ user });
+            user.jobs = jobs.map((job) => job.job_id);
+            return res.json({ user: user });
+            // return res.json({ user });
         }
         throw new UnauthorizedError();
     } catch (err) {

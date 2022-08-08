@@ -7,6 +7,7 @@ const {
 } = require('../expressError');
 const db = require('../db.js');
 const User = require('./user.js');
+const Job = require('./job.js');
 const {
     commonBeforeAll,
     commonBeforeEach,
@@ -102,6 +103,34 @@ describe('register', function () {
                 ...newUser,
                 password: 'password',
             });
+            fail();
+        } catch (err) {
+            expect(err instanceof BadRequestError).toBeTruthy();
+        }
+    });
+});
+
+/************************************** apply */
+describe('apply', function () {
+    const newJob = {
+        title: 'Chef',
+        salary: 50000,
+        equity: '0',
+        companyHandle: 'c1',
+    };
+    test('works', async function () {
+        const job = await Job.create(newJob);
+        const application = await User.apply('u1', job.id);
+        expect(application).toEqual({
+            username: 'u1',
+            job_id: job.id,
+        });
+    });
+    test('Throws error if duplicate application', async function () {
+        try {
+            const job = await Job.create(newJob);
+            await User.apply('u1', job.id);
+            await User.apply('u1', job.id);
             fail();
         } catch (err) {
             expect(err instanceof BadRequestError).toBeTruthy();
